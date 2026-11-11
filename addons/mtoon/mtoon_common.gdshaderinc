@@ -80,6 +80,9 @@ uniform float _DebugMode : hint_range(0,3,1) = 0.0;
 
 uniform float _MToonVersion = 33;
 
+// Draws the mesh closer to the camera than it is, as BaseMaterial3D does with use_z_clip_scale.
+uniform float z_clip_scale : hint_range(0.01, 1.0, 0.01) = 1.0;
+
 // const
 const float PI_2 = 6.283185307180;
 const float EPS_COL = 0.00001;
@@ -90,6 +93,7 @@ varying vec3 tspace1; // : TEXCOORD2;
 varying vec3 tspace2; // : TEXCOORD3;
 
 void vertex() {
+	Z_CLIP_SCALE = z_clip_scale;
 	UV=UV*_MainTex_ST.xy+_MainTex_ST.zw;
 	COLOR=COLOR;
 
