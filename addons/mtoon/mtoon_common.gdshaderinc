@@ -83,6 +83,14 @@ uniform float _MToonVersion = 33;
 // Draws the mesh closer to the camera than it is, as BaseMaterial3D does with use_z_clip_scale.
 uniform float z_clip_scale : hint_range(0.01, 1.0, 0.01) = 1.0;
 
+// The dissolve: the cutout of "Simple Dissolve" and the edge of "Enhanced Dissolve", both by ProfesorShader on
+// godotshaders.com (CC0). At the default threshold of 0.0 the mesh draws whole. The outline pass shares them.
+uniform float dissolve_threshold : hint_range(0.0, 1.0) = 0.0;
+uniform sampler2D dissolve_noise_texture;
+uniform float dissolve_noise_scale = 1.0;
+uniform float dissolve_edge_size = 0.025;
+uniform vec3 dissolve_edge_color : source_color = vec3(1.0, 0.0, 0.0);
+
 // const
 const float PI_2 = 6.283185307180;
 const float EPS_COL = 0.00001;
@@ -327,6 +335,14 @@ void fragment() {
 
 	ROUGHNESS = 1.0;
 	METALLIC = 0.0;
+	if (dissolve_threshold > 0.0) {
+		float dissolve_noise = texture(dissolve_noise_texture, UV * dissolve_noise_scale).r;
+		if (dissolve_noise < dissolve_threshold) { discard; }
+		float dissolve_value = smoothstep(dissolve_threshold, 1.0, dissolve_noise);
+		float mix_val = smoothstep(0.0, dissolve_edge_size, dissolve_value);
+		ALBEDO = mix(vec3(0.0), ALBEDO, mix_val);
+		EMISSION = mix(dissolve_edge_color, EMISSION, mix_val);
+	}
 #if defined(ALPHA_BLEND)
 	ALPHA = alpha;
 #elif defined(ALPHA_CUTOUT)
