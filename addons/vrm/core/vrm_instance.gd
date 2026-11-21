@@ -118,5 +118,10 @@ func _on_group_settings_changed() -> void:
         spring_bone_controller._setup_spring_bone_adapter()
 
 
+func _validate_property(property: Dictionary) -> void:
+    if property.name in [&"spring_bones", &"collider_groups", &"collider_library"]:
+        property.usage &= ~PROPERTY_USAGE_STORAGE
+
+
 func is_vrm_root() -> bool:
     return true
